@@ -7,3 +7,8 @@ resource "azurerm_resource_group" "shared" {
   name     = module.shared_naming.resource_group.name
   location = var.location
 }
+
+resource "azurerm_resource_group" "llm" {
+  name     = module.llm_naming.resource_group.name
+  location = var.location
+}

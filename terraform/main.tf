@@ -17,3 +17,14 @@ module "shared_services" {
   hub_vnet_id    = module.hub.hub_vnet_id
   fw_ip          = module.hub.fw_ip
 }
+
+// Create LLM solution
+module "llm_solution" {
+  source         = "./modules/llm_solution"
+  prefix         = var.prefix
+  resource_group = azurerm_resource_group.llm.name
+  location       = var.location
+  vnet_range     = "10.0.2.0/24"
+  hub_vnet_id    = module.hub.hub_vnet_id
+  fw_ip          = module.hub.fw_ip
+}

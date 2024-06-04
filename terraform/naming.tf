@@ -7,3 +7,8 @@ module "shared_naming" {
   source = "Azure/naming/azurerm"
   suffix = [var.prefix, "shared"]
 }
+
+module "llm_naming" {
+  source = "Azure/naming/azurerm"
+  suffix = [var.prefix, "llm"]
+}
