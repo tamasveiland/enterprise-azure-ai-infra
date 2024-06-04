@@ -24,7 +24,7 @@ resource "azurerm_firewall_policy" "main" {
 }
 
 resource "azurerm_firewall" "main" {
-  name                = "testfirewall"
+  name                = module.fw_naming.firewall.name
   resource_group_name = var.resource_group
   location            = var.location
   sku_name            = "AZFW_VNet"
@@ -33,13 +33,13 @@ resource "azurerm_firewall" "main" {
 
   ip_configuration {
     name                 = "configuration"
-    subnet_id            = azurerm_subnet.azure_fw
+    subnet_id            = azurerm_subnet.azure_fw.id
     public_ip_address_id = azurerm_public_ip.fw.id
   }
 
   management_ip_configuration {
     name                 = "management"
-    subnet_id            = azurerm_subnet.azure_fw
-    public_ip_address_id = azurerm_public_ip.azure_fw_mgmt.id
+    subnet_id            = azurerm_subnet.azure_fw_mgmt.id
+    public_ip_address_id = azurerm_public_ip.fw_management.id
   }
 }
