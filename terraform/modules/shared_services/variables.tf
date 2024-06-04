@@ -39,3 +39,10 @@ variable "hub_vnet_id" {
 ID of the hub virtual network.
 EOF
 }
+
+variable "fw_ip" {
+  type        = string
+  description = <<EOF
+IP of Azure Firewall in hub subscription to be used as next hop for User Defined Routes
+EOF
+}

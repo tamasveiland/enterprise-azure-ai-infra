@@ -15,4 +15,5 @@ module "shared_services" {
   location       = var.location
   vnet_range     = "10.0.1.0/24"
   hub_vnet_id    = module.hub.hub_vnet_id
+  fw_ip          = module.hub.fw_ip
 }

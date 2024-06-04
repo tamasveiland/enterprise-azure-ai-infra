@@ -31,3 +31,18 @@ resource "azurerm_virtual_network_peering" "spoke_to_hub" {
   virtual_network_name      = azurerm_virtual_network.main.name
   remote_virtual_network_id = var.hub_vnet_id
 }
+
+resource "azurerm_route_table" "main" {
+  name                = module.shared_naming.route_table.name
+  resource_group_name = var.resource_group
+  location            = var.location
+}
+
+resource "azurerm_route" "internal" {
+  name                   = "internal"
+  route_table_name       = azurerm_route_table.main.name
+  resource_group_name    = var.resource_group
+  address_prefix         = "10.0.0.0/8"
+  next_hop_type          = "VirtualAppliance"
+  next_hop_in_ip_address = var.fw_ip
+}
