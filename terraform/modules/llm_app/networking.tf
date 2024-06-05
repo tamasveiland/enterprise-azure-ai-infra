@@ -1,8 +1,9 @@
 resource "azurerm_virtual_network" "main" {
-  name                = module.llm_naming.virtual_network.name
+  name                = module.llmapp_naming.virtual_network.name
   resource_group_name = var.resource_group
   location            = var.location
   address_space       = [var.vnet_range]
+  dns_servers         = [var.dns_ip]
 }
 
 resource "azurerm_subnet" "default" {
@@ -20,21 +21,21 @@ resource "azurerm_subnet" "services" {
 }
 
 resource "azurerm_virtual_network_peering" "hub_to_spoke" {
-  name                      = "hub-to-llm"
+  name                      = "hub-to-llmapp"
   resource_group_name       = local.hub_resource_group_name
   virtual_network_name      = local.hub_virtual_network_name
   remote_virtual_network_id = azurerm_virtual_network.main.id
 }
 
 resource "azurerm_virtual_network_peering" "spoke_to_hub" {
-  name                      = "llm-to-hub"
+  name                      = "llmapp-to-hub"
   resource_group_name       = var.resource_group
   virtual_network_name      = azurerm_virtual_network.main.name
   remote_virtual_network_id = var.hub_vnet_id
 }
 
 resource "azurerm_route_table" "main" {
-  name                = module.llm_naming.route_table.name
+  name                = module.llmapp_naming.route_table.name
   resource_group_name = var.resource_group
   location            = var.location
 }

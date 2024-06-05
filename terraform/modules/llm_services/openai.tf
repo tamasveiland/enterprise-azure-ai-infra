@@ -1,10 +1,11 @@
 resource "azurerm_cognitive_account" "openai" {
-  name                  = module.llm_naming.cognitive_account.name
-  resource_group_name   = var.resource_group
-  location              = var.location
-  kind                  = "OpenAI"
-  sku_name              = "S0"
-  custom_subdomain_name = module.llm_naming.cognitive_account.name
+  name                          = module.llm_naming.cognitive_account.name
+  resource_group_name           = var.resource_group
+  location                      = var.location
+  kind                          = "OpenAI"
+  sku_name                      = "S0"
+  custom_subdomain_name         = module.llm_naming.cognitive_account.name
+  public_network_access_enabled = false
 
   identity {
     type         = "SystemAssigned, UserAssigned"

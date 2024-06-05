@@ -1,6 +1,7 @@
 locals {
   zones = [
-    "privatelink.openai.azure.com"
+    "privatelink.openai.azure.com",
+    "privatelink.search.windows.net"
   ]
 }
 
@@ -17,6 +18,14 @@ resource "azurerm_private_dns_zone_virtual_network_link" "main" {
   resource_group_name   = var.resource_group
   private_dns_zone_name = azurerm_private_dns_zone.main[each.key].name
   virtual_network_id    = azurerm_virtual_network.main.id
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "hub" {
+  for_each              = toset(local.zones)
+  name                  = "${replace(each.key, ".", "-")}-hub-link"
+  resource_group_name   = var.resource_group
+  private_dns_zone_name = azurerm_private_dns_zone.main[each.key].name
+  virtual_network_id    = var.hub_vnet_id
 }
 
 // Private DNS resolver

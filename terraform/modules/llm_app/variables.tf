@@ -46,3 +46,17 @@ variable "fw_ip" {
 IP of Azure Firewall in hub subscription to be used as next hop for User Defined Routes
 EOF
 }
+
+variable "dns_ip" {
+  type        = string
+  description = <<EOF
+IP of the DNS server to be used for DNS resolution
+EOF
+}
+
+variable "private_dns_zone_resource_group_name" {
+  type        = string
+  description = <<EOF
+Name of the resource group where the private DNS zone is located.
+EOF
+}
