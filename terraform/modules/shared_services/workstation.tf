@@ -30,4 +30,8 @@ resource "azurerm_windows_virtual_machine" "vm" {
     sku       = "win11-23h2-ent"
     version   = "latest"
   }
+
+  identity {
+    type = "SystemAssigned"
+  }
 }

@@ -7,6 +7,16 @@ module "hub" {
   vnet_range     = "10.0.0.0/24"
 }
 
+// Firewall rules
+module "firewall_rules" {
+  source             = "./modules/firewall_rules"
+  firewall_policy_id = module.hub.firewall_policy_id
+  openai_fqdn        = module.llm_services.openai_fqdn
+  dns_ip             = module.shared_services.dns_ip
+  llmapp_fqdn        = module.llm_app.llmapp_fqdn
+  llmapp_scm_fqdn    = module.llm_app.llmapp_scm_fqdn
+}
+
 // Create shared services
 module "shared_services" {
   source         = "./modules/shared_services"
@@ -30,7 +40,7 @@ module "llm_services" {
   dns_ip                               = module.shared_services.dns_ip
   private_dns_zone_resource_group_name = azurerm_resource_group.shared.name
 
-  depends_on = [ module.shared_services ]
+  depends_on = [module.shared_services]
 }
 
 module "llm_app" {
@@ -43,6 +53,10 @@ module "llm_app" {
   fw_ip                                = module.hub.fw_ip
   dns_ip                               = module.shared_services.dns_ip
   private_dns_zone_resource_group_name = azurerm_resource_group.shared.name
+  azure_openai_endpoint                = module.llm_services.azure_openai_endpoint
+  azure_openai_key                     = module.llm_services.azure_openai_key
+  azure_openai_model                   = module.llm_services.azure_openai_model
+  azure_openai_resource                = module.llm_services.azure_openai_resource
 
-  depends_on = [ module.shared_services ]
+  depends_on = [module.shared_services]
 }

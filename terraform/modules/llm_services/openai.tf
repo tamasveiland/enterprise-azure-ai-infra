@@ -1,3 +1,4 @@
+// Azure OpenAI Service
 resource "azurerm_cognitive_account" "openai" {
   name                          = module.llm_naming.cognitive_account.name
   resource_group_name           = var.resource_group
@@ -11,8 +12,29 @@ resource "azurerm_cognitive_account" "openai" {
     type         = "SystemAssigned, UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.main.id]
   }
+
+  lifecycle {
+    ignore_changes = [customer_managed_key]
+  }
 }
 
+// Model deployment
+resource "azurerm_cognitive_deployment" "gpt35" {
+  name                 = "gpt35"
+  cognitive_account_id = azurerm_cognitive_account.openai.id
+  model {
+    format  = "OpenAI"
+    name    = "gpt-35-turbo"
+    version = "1106"
+  }
+
+  scale {
+    type     = "Standard"
+    capacity = 60
+  }
+}
+
+// Key Vault for cognitive service encryption
 resource "azurerm_key_vault_key" "openai" {
   name         = "openai-key"
   key_vault_id = azurerm_key_vault.main.id
@@ -21,10 +43,17 @@ resource "azurerm_key_vault_key" "openai" {
   key_opts     = ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"]
 }
 
+// Customer managed key for cognitive service
 resource "azurerm_cognitive_account_customer_managed_key" "openai" {
   cognitive_account_id = azurerm_cognitive_account.openai.id
   key_vault_key_id     = azurerm_key_vault_key.openai.id
   identity_client_id   = azurerm_user_assigned_identity.main.client_id
+}
+
+// Private endpoint for cognitive service
+data "azurerm_private_dns_zone" "openai" {
+  name                = "privatelink.openai.azure.com"
+  resource_group_name = var.private_dns_zone_resource_group_name
 }
 
 resource "azurerm_private_endpoint" "openai" {
@@ -32,6 +61,10 @@ resource "azurerm_private_endpoint" "openai" {
   location            = var.location
   resource_group_name = var.resource_group
   subnet_id           = azurerm_subnet.services.id
+  private_dns_zone_group {
+    name                 = "openai"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.openai.id]
+  }
 
   private_service_connection {
     name                           = "${module.llm_naming.cognitive_account.name}-psc"
@@ -40,3 +73,5 @@ resource "azurerm_private_endpoint" "openai" {
     subresource_names              = ["account"]
   }
 }
+
+

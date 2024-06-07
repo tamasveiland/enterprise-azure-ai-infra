@@ -22,7 +22,7 @@ resource "azurerm_private_endpoint" "search_service" {
     name                           = "${module.llmapp_naming.search_service.name}-psc"
     is_manual_connection           = false
     private_connection_resource_id = azurerm_search_service.main.id
-    subresource_names              = ["search"]
+    subresource_names              = ["searchService"]
   }
 
   private_dns_zone_group {

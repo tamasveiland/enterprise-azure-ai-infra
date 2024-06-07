@@ -1,7 +1,8 @@
 locals {
   zones = [
     "privatelink.openai.azure.com",
-    "privatelink.search.windows.net"
+    "privatelink.search.windows.net",
+    "privatelink.azurewebsites.net"
   ]
 }
 
