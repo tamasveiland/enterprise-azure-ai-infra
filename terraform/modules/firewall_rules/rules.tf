@@ -100,6 +100,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "openai" {
       destination_fqdns = [
         var.llmapp_fqdn,
         var.llmapp_scm_fqdn,
+        "spoppe-b.azureedge.net",
       ]
 
       protocols {
