@@ -23,6 +23,7 @@ resource "azurerm_linux_web_app" "main" {
 
   site_config {
     vnet_route_all_enabled = true
+    always_on              = false
 
     application_stack {
       python_version = "3.11"
