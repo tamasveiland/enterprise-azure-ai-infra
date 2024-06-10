@@ -60,3 +60,16 @@ module "llm_app" {
 
   depends_on = [module.shared_services]
 }
+
+// Azure Machine Learning with Managed VNET
+module "aml_managed_vnet" {
+  source                               = "./modules/aml_managed_vnet"
+  prefix                               = var.prefix
+  resource_group                       = azurerm_resource_group.amlmanagedvnet.name
+  location                             = var.location
+  vnet_range                           = "10.0.4.0/24"
+  hub_vnet_id                          = module.hub.hub_vnet_id
+  fw_ip                                = module.hub.fw_ip
+  dns_ip                               = module.shared_services.dns_ip
+  private_dns_zone_resource_group_name = azurerm_resource_group.shared.name
+}
