@@ -1,4 +1,5 @@
-# enterprise-azure-ai-infra
+# Enterprise enabled infrastructure for Azure AI services
+![Azure AI](./diagrams/ai_infrastructure.png)
 
 Note to fix current issue in WebApp:
 ```bash
