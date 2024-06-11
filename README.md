@@ -9,19 +9,8 @@ az webapp config set --startup-file "python3 -m gunicorn app:app" --name llmapp-
 When demonstrating AML managed VNET nothing will happen until you create first compute instance. Go to AML portal a create one and demonstrate pending requests for Private Endpoint poping up in AML itself (control plane access), Key Vault and Storage.
 
 # Enterprise AI infrastructure
-Here are steps to showcase network performance and latencies.
+## Network latencies
+Use serial console to test throughput via ```iperf3 -c vm-a-z2-vm1``` or latency via ```qperf vm-a-z2-vm1 tcp_lat```. Server-side is preinstalled and running on each machine. Machines are with network acceleration enabled or disabled, in various zones or in proximity placement groups.
 
-```bash
-export prefix="eai"
-
-# Zone 1 to Zone 2, no network acceleration
-az serial-console connect -n vm-na-z1-vm1 -g rg-$prefix-infra
-
-# Zone 1 to Zone 2, with network acceleration
-az serial-console connect -n vm-a-z1-vm1 -g rg-$prefix-infra
-
-# Zone 1 to Zone 2, with network acceleration
-az serial-console connect -n vm-a-z2-vm1 -g rg-$prefix-infra
-az serial-console connect -n vm-a-z3-vm1 -g rg-$prefix-infra
-
-```
+## GPU example
+Terraform deploy GPU VM and uses cloud-init script to install NVIDIA CUDA drivers, install ollama a pre-download Phi3 model (14B version in 6-bit quantization so it fits 16GB of GPU RAM of T4 machine). Then use ```run.sh``` in home folder to start chat with local LLM.

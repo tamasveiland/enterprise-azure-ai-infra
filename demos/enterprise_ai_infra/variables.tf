@@ -36,8 +36,24 @@ EOF
 
 variable "enable_latency_demo" {
   type        = bool
-  default     = false
+  default     = true
   description = <<EOF
 Enable the latency demo nad deploy couple of VMs in different zones and proximity placement groups.
+EOF
+}
+
+variable "gpu_vm_size" {
+  type        = string
+  default     = "Standard_NC4as_T4_v3"
+  description = <<EOF
+Size of the GPU VMs to create.
+EOF
+}
+
+variable "enable_gpu_demo" {
+  type        = bool
+  default     = true
+  description = <<EOF
+Enable the GPU demo and deploy a VM with a GPU.
 EOF
 }
