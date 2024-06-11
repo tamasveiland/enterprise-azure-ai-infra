@@ -60,24 +60,3 @@ variable "private_dns_zone_resource_group_name" {
 Name of the resource group where the private DNS zone is located.
 EOF
 }
-
-
-# variable "azure_openai_resource" {
-#   type        = string
-#   description = "The name of the Azure OpenAI resource."
-# }
-
-# variable "azure_openai_model" {
-#   type        = string
-#   description = "The model to be used in the Azure OpenAI resource."
-# }
-
-# variable "azure_openai_key" {
-#   type        = string
-#   description = "The key for the Azure OpenAI resource."
-# }
-
-# variable "azure_openai_endpoint" {
-#   type        = string
-#   description = "The endpoint for the Azure OpenAI resource."
-# }

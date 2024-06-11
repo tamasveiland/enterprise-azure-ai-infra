@@ -1,6 +1,6 @@
 variable "prefix" {
   type        = string
-  default     = "eai"
+  default     = "cetc"
   description = <<EOF
 Prefix for Azure resources. 
 

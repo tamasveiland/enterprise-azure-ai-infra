@@ -5,7 +5,7 @@ resource "azurerm_machine_learning_workspace" "main" {
   application_insights_id        = azurerm_application_insights.main.id
   key_vault_id                   = azurerm_key_vault.main.id
   storage_account_id             = azurerm_storage_account.main.id
-  high_business_impact           = false
+  high_business_impact           = true
   primary_user_assigned_identity = azurerm_user_assigned_identity.aml.id
 
   identity {

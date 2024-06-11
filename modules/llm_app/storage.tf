@@ -28,12 +28,12 @@ resource "azurerm_storage_container" "main" {
 
 // Upload data to storage account
 resource "azurerm_storage_blob" "main" {
-  for_each               = fileset("${path.module}/../../../data", "**")
+  for_each               = fileset("${path.module}/../../data", "**")
   name                   = each.key
   storage_account_name   = azurerm_storage_account.main.name
   storage_container_name = azurerm_storage_container.main.name
   type                   = "Block"
-  source                 = "${path.module}/../../../data/${each.key}"
+  source                 = "${path.module}/../../data/${each.key}"
 }
 
 // Private endpoint for storage account

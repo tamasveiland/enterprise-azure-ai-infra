@@ -1,6 +1,6 @@
 // Create hub
 module "hub" {
-  source         = "./modules/hub"
+  source         = "../../modules/hub"
   prefix         = var.prefix
   resource_group = azurerm_resource_group.hub.name
   location       = var.location
@@ -9,7 +9,7 @@ module "hub" {
 
 // Firewall rules
 module "firewall_rules" {
-  source             = "./modules/firewall_rules"
+  source             = "../../modules/firewall_rules"
   firewall_policy_id = module.hub.firewall_policy_id
   openai_fqdn        = module.llm_services.openai_fqdn
   dns_ip             = module.shared_services.dns_ip
@@ -19,7 +19,7 @@ module "firewall_rules" {
 
 // Create shared services
 module "shared_services" {
-  source         = "./modules/shared_services"
+  source         = "../../modules/shared_services"
   prefix         = var.prefix
   resource_group = azurerm_resource_group.shared.name
   location       = var.location
@@ -30,7 +30,7 @@ module "shared_services" {
 
 // Create LLM solution
 module "llm_services" {
-  source                               = "./modules/llm_services"
+  source                               = "../../modules/llm_services"
   prefix                               = var.prefix
   resource_group                       = azurerm_resource_group.llm.name
   location                             = var.location
@@ -44,7 +44,7 @@ module "llm_services" {
 }
 
 module "llm_app" {
-  source                               = "./modules/llm_app"
+  source                               = "../../modules/llm_app"
   prefix                               = var.prefix
   resource_group                       = azurerm_resource_group.llmapp.name
   location                             = var.location
@@ -63,7 +63,7 @@ module "llm_app" {
 
 // Azure Machine Learning with Managed VNET
 module "aml_managed_vnet" {
-  source                               = "./modules/aml_managed_vnet"
+  source                               = "../../modules/aml_managed_vnet"
   prefix                               = var.prefix
   resource_group                       = azurerm_resource_group.amlmanagedvnet.name
   location                             = var.location

@@ -22,3 +22,4 @@ module "aml_managed_vnet_naming" {
   source = "Azure/naming/azurerm"
   suffix = [var.prefix, "amlmanagedvnet"]
 }
+
