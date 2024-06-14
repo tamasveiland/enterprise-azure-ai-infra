@@ -29,8 +29,8 @@ resource "azurerm_key_vault" "main" {
   }
 
   access_policy {
-    tenant_id = azurerm_user_assigned_identity.main.tenant_id
-    object_id = azurerm_user_assigned_identity.main.principal_id
+    tenant_id = azurerm_cognitive_account.openai.identity[0].tenant_id
+    object_id = azurerm_cognitive_account.openai.identity[0].principal_id
     key_permissions = [
       "Get", "Create", "Delete", "List", "Restore", "Recover", "UnwrapKey", "WrapKey", "Purge", "Encrypt", "Decrypt", "Sign", "Verify"
     ]

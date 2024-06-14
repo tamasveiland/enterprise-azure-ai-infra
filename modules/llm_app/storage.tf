@@ -59,3 +59,24 @@ resource "azurerm_private_endpoint" "storage" {
     private_dns_zone_ids = [data.azurerm_private_dns_zone.blob.id]
   }
 }
+
+// Give access to Azure AI Search
+resource "azurerm_role_assignment" "search_service_storage_contributor" {
+  scope                = azurerm_storage_account.main.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_search_service.main.identity[0].principal_id
+}
+
+// Give access to Azure OpenAI
+resource "azurerm_role_assignment" "openai_storage_contributor" {
+  scope                = azurerm_storage_account.main.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = var.azure_openai_principal_id
+}
+
+// Give access to self
+resource "azurerm_role_assignment" "self_storage_contributor" {
+  scope                = azurerm_storage_account.main.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+}

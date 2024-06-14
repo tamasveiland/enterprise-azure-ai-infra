@@ -3,7 +3,7 @@ resource "azurerm_service_plan" "main" {
   resource_group_name = var.resource_group
   location            = var.location
   os_type             = "Linux"
-  sku_name            = "S1"
+  sku_name            = "P1v3"
 }
 
 resource "random_string" "webapp" {
@@ -21,6 +21,10 @@ resource "azurerm_linux_web_app" "main" {
   service_plan_id           = azurerm_service_plan.main.id
   virtual_network_subnet_id = azurerm_subnet.appservice.id
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   site_config {
     vnet_route_all_enabled = true
     always_on              = false
@@ -33,11 +37,17 @@ resource "azurerm_linux_web_app" "main" {
   app_settings = {
     "AZURE_OPENAI_RESOURCE"          = var.azure_openai_resource
     "AZURE_OPENAI_MODEL"             = var.azure_openai_model
-    "AZURE_OPENAI_KEY"               = var.azure_openai_key
+    # "AZURE_OPENAI_KEY"               = var.azure_openai_key
     "AZURE_OPENAI_ENDPOINT"          = var.azure_openai_endpoint
-    "AZURE_OPENAI_SYSTEM_MESSAGE"    = "You are helpful AI assistent specializing in answering questions about Azure networking concepts such as Private Endpoints, VNETs, Azure Firewall, Routing and network related services such as NSG, Application Gateway and others."
+    "AZURE_OPENAI_SYSTEM_MESSAGE"    = "You are funny AI assistant that talks about vegetables that became conscious. You will be presented with context to base your answers on, follow it."
     "UI_TITLE"                       = "CE Tech Community"
     "SCM_DO_BUILD_DURING_DEPLOYMENT" = "true"
+    "UI_LOGO"                        = "https://raw.githubusercontent.com/tkubica12/enterprise-azure-ai-infra/main/images/csu-logo.png"
+    "AZURE_SEARCH_SERVICE"           = azurerm_search_service.main.name
+    "AZURE_SEARCH_INDEX"             = "vegetables"
+    "DATASOURCE_TYPE"                = "AzureCognitiveSearch"
+    "AZURE_SEARCH_QUERY_TYPE"        = "vectorSimpleHybrid"
+    "AZURE_OPENAI_EMBEDDING_NAME"    = "text-embedding-ada-002"
   }
 }
 

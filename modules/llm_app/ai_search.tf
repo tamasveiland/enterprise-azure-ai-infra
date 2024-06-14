@@ -5,7 +5,11 @@ resource "azurerm_search_service" "main" {
   location                      = var.location
   sku                           = "standard"
   local_authentication_enabled  = false
-  public_network_access_enabled = false
+  public_network_access_enabled = true
+
+  identity {
+    type = "SystemAssigned"
+  }
 }
 
 // Private endpoint for Azure AI Search
@@ -40,4 +44,24 @@ resource "azurerm_search_shared_private_link_service" "blob" {
   subresource_name   = "blob"
   target_resource_id = azurerm_storage_account.main.id
   request_message    = "ai-search-connection-to-blob-storage"
+}
+
+// Give access to OpenAI Service
+resource "azurerm_role_assignment" "openai_search_service_contributor" {
+  scope                = azurerm_search_service.main.id
+  role_definition_name = "Search Service Contributor"
+  principal_id         = var.azure_openai_principal_id
+}
+
+resource "azurerm_role_assignment" "openai_search_data_reader" {
+  scope                = azurerm_search_service.main.id
+  role_definition_name = "Search Index Data Reader"
+  principal_id         = var.azure_openai_principal_id
+}
+
+// Give access to WebApp
+resource "azurerm_role_assignment" "webapp_search_service_contributor" {
+  scope                = azurerm_search_service.main.id
+  role_definition_name = "Search Index Data Reader"
+  principal_id         = azurerm_linux_web_app.main.identity[0].principal_id
 }

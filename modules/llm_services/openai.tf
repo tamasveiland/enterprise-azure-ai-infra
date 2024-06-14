@@ -6,7 +6,7 @@ resource "azurerm_cognitive_account" "openai" {
   kind                          = "OpenAI"
   sku_name                      = "S0"
   custom_subdomain_name         = module.llm_naming.cognitive_account.name
-  public_network_access_enabled = false
+  public_network_access_enabled = true
 
   identity {
     type         = "SystemAssigned, UserAssigned"
@@ -14,7 +14,7 @@ resource "azurerm_cognitive_account" "openai" {
   }
 
   lifecycle {
-    ignore_changes = [customer_managed_key]
+    ignore_changes = [customer_managed_key, network_acls]
   }
 }
 
@@ -31,6 +31,21 @@ resource "azurerm_cognitive_deployment" "gpt35" {
   scale {
     type     = "Standard"
     capacity = 60
+  }
+}
+
+resource "azurerm_cognitive_deployment" "embeddings" {
+  name                 = "text-embedding-ada-002"
+  cognitive_account_id = azurerm_cognitive_account.openai.id
+  model {
+    format  = "OpenAI"
+    name    = "text-embedding-ada-002"
+    version = "2"
+  }
+
+  scale {
+    type     = "Standard"
+    capacity = 100
   }
 }
 
@@ -75,3 +90,15 @@ resource "azurerm_private_endpoint" "openai" {
 }
 
 
+// Give access to AI Search
+resource "azurerm_role_assignment" "openai" {
+  principal_id         = var.search_principal_id
+  role_definition_name = "Cognitive Services OpenAI Contributor"
+  scope                = azurerm_cognitive_account.openai.id
+}
+// Give access to WebApp
+resource "azurerm_role_assignment" "webapp_openai" {
+  principal_id         = var.webapp_principal_id
+  role_definition_name = "Cognitive Services OpenAI User"
+  scope                = azurerm_cognitive_account.openai.id
+}

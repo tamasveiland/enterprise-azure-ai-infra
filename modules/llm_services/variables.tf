@@ -60,3 +60,17 @@ variable "private_dns_zone_resource_group_name" {
 Name of the resource group where the private DNS zone is located.
 EOF
 }
+
+variable "search_principal_id" {
+  type        = string
+  description = <<EOF
+Principal ID of the Azure Search service.
+EOF
+}
+
+variable "webapp_principal_id" {
+  type        = string
+  description = <<EOF
+Principal ID of the WebApp service.
+EOF
+}

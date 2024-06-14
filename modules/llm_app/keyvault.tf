@@ -46,7 +46,7 @@ resource "azurerm_key_vault_key" "search" {
 }
 
 resource "azurerm_role_assignment" "search" {
-  principal_id         = azurerm_user_assigned_identity.search.principal_id
+  principal_id         = azurerm_search_service.main.identity.0.principal_id
   role_definition_name = "Key Vault Crypto Service Encryption User"
   scope                = "${azurerm_key_vault.main.id}/keys/${azurerm_key_vault_key.search.name}"
 }

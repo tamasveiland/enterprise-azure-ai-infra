@@ -39,6 +39,8 @@ module "llm_services" {
   fw_ip                                = module.hub.fw_ip
   dns_ip                               = module.shared_services.dns_ip
   private_dns_zone_resource_group_name = azurerm_resource_group.shared.name
+  search_principal_id                  = module.llm_app.search_principal_id
+  webapp_principal_id                  = module.llm_app.webapp_principal_id
 
   depends_on = [module.shared_services]
 }
@@ -57,6 +59,7 @@ module "llm_app" {
   azure_openai_key                     = module.llm_services.azure_openai_key
   azure_openai_model                   = module.llm_services.azure_openai_model
   azure_openai_resource                = module.llm_services.azure_openai_resource
+  azure_openai_principal_id            = module.llm_services.azure_openai_principal_id
 
   depends_on = [module.shared_services]
 }

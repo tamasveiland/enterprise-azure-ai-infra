@@ -19,3 +19,7 @@ output "azure_openai_model" {
   value = azurerm_cognitive_deployment.gpt35.name
 }
 
+output "azure_openai_principal_id" {
+  value = azurerm_cognitive_account.openai.identity.0.principal_id
+}
+

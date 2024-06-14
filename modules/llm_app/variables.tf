@@ -81,3 +81,8 @@ variable "azure_openai_endpoint" {
   type        = string
   description = "The endpoint for the Azure OpenAI resource."
 }
+
+variable "azure_openai_principal_id" {
+  type        = string
+  description = "The principal for the Azure OpenAI resource."
+}
