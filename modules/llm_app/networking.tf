@@ -12,21 +12,21 @@ resource "azurerm_subnet" "default" {
   name                 = "default"
   resource_group_name  = var.resource_group
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = [cidrsubnet(var.vnet_range, 2, 0)]
+  address_prefixes     = [cidrsubnet(var.vnet_range, 3, 0)]
 }
 
 resource "azurerm_subnet" "services" {
   name                 = "services"
   resource_group_name  = var.resource_group
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = [cidrsubnet(var.vnet_range, 2, 1)]
+  address_prefixes     = [cidrsubnet(var.vnet_range, 3, 1)]
 }
 
 resource "azurerm_subnet" "appservice" {
   name                 = "appservice"
   resource_group_name  = var.resource_group
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = [cidrsubnet(var.vnet_range, 2, 2)]
+  address_prefixes     = [cidrsubnet(var.vnet_range, 3, 2)]
 
   delegation {
     name = "appserviceDelegation"
@@ -41,8 +41,24 @@ resource "azurerm_subnet" "appservicefrontend" {
   name                 = "appservicefrontend"
   resource_group_name  = var.resource_group
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = [cidrsubnet(var.vnet_range, 2, 3)]
+  address_prefixes     = [cidrsubnet(var.vnet_range, 3, 3)]
 }
+
+resource "azurerm_subnet" "container_instances" {
+  name                 = "container_instances"
+  resource_group_name  = var.resource_group
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = [cidrsubnet(var.vnet_range, 3, 4)]
+
+  delegation {
+    name = "containerInstancesDelegation"
+    service_delegation {
+      name    = "Microsoft.ContainerInstance/containerGroups"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+}
+
 
 // Peerings
 

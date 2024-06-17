@@ -15,7 +15,7 @@ resource "random_string" "webapp" {
 }
 
 resource "azurerm_linux_web_app" "main" {
-  name                      = "llmapp-${random_string.webapp.result}"
+  name                      = module.llmapp_naming.app_service.name_unique
   resource_group_name       = var.resource_group
   location                  = var.location
   service_plan_id           = azurerm_service_plan.main.id

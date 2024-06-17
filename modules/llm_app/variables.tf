@@ -67,6 +67,11 @@ variable "azure_openai_resource" {
   description = "The name of the Azure OpenAI resource."
 }
 
+variable "azure_openai_id" {
+  type        = string
+  description = "The Resource ID of the Azure OpenAI resource."
+}
+
 variable "azure_openai_model" {
   type        = string
   description = "The model to be used in the Azure OpenAI resource."

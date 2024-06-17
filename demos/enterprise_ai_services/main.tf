@@ -60,6 +60,7 @@ module "llm_app" {
   azure_openai_model                   = module.llm_services.azure_openai_model
   azure_openai_resource                = module.llm_services.azure_openai_resource
   azure_openai_principal_id            = module.llm_services.azure_openai_principal_id
+  azure_openai_id                      = module.llm_services.azure_openai_id
 
   depends_on = [module.shared_services]
 }

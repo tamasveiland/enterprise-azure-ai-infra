@@ -1,12 +1,57 @@
-# Configure AI Search
-from azure.identity import ManagedIdentityCredential
+from dotenv import load_dotenv
+from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 import os
 
-from azure.search.documents.indexes import SearchIndexerClient, SearchIndexClient
+from azure.search.documents.indexes import SearchIndexerClient
+from azure.search.documents.indexes.models import SearchIndexerDataContainer, SearchIndexerDataSourceConnection
+from azure.search.documents.indexes._generated.models import NativeBlobSoftDeleteDeletionDetectionPolicy
+
 from azure.search.documents.indexes.models import (
-    SearchIndexerDataContainer, 
-    SearchIndexerDataSourceConnection,
+    SplitSkill,
+    InputFieldMappingEntry,
+    OutputFieldMappingEntry,
+    AzureOpenAIEmbeddingSkill,
+    SearchIndexerIndexProjections,
+    SearchIndexerIndexProjectionSelector,
+    SearchIndexerIndexProjectionsParameters,
+    IndexProjectionMode,
+    SearchIndexerSkillset
+)
+
+from azure.search.documents.indexes.models import (
+    SearchIndexer,
+    FieldMapping
+)
+
+# Load environment variables
+load_dotenv(override=True)
+endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
+credential = DefaultAzureCredential()
+blob_container_name = "rag"
+blob_connection_string = f"ResourceId={os.environ["BLOB_RESOURCE_ID"]};" 
+azure_openai_endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
+azure_openai_key = os.environ["AZURE_OPENAI_KEY"]
+azure_openai_embedding_deployment = "text-embedding-ada-002"
+index_name = "vegetables"
+
+# Create a data source 
+indexer_client = SearchIndexerClient(endpoint, credential)
+container = SearchIndexerDataContainer(name=blob_container_name)
+data_source_connection = SearchIndexerDataSourceConnection(
+    name="vegetables",
+    type="azureblob",
+    connection_string=blob_connection_string,
+    container=container,
+    data_deletion_detection_policy=NativeBlobSoftDeleteDeletionDetectionPolicy(),
+    data_to_extract="storageMetadata"
+)
+data_source = indexer_client.create_or_update_data_source_connection(data_source_connection)
+
+print(f"Data source '{data_source.name}' created or updated")
+
+from azure.search.documents.indexes import SearchIndexClient
+from azure.search.documents.indexes.models import (
     SearchField,
     SearchFieldDataType,
     VectorSearch,
@@ -22,71 +67,10 @@ from azure.search.documents.indexes.models import (
     SemanticSearch,
     SemanticPrioritizedFields,
     SemanticField,
-    SearchIndex,
-    SplitSkill,
-    InputFieldMappingEntry,
-    OutputFieldMappingEntry,
-    AzureOpenAIEmbeddingSkill,
-    SearchIndexerIndexProjections,
-    SearchIndexerIndexProjectionSelector,
-    SearchIndexerIndexProjectionsParameters,
-    IndexProjectionMode,
-    SearchIndexerSkillset,
-    SearchIndexer,
-    FieldMapping,
+    SearchIndex
 )
-from azure.search.documents.indexes._generated.models import NativeBlobSoftDeleteDeletionDetectionPolicy
-
-# Load environment variables
-endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
-credential = ManagedIdentityCredential()
-blob_container_name = "rag"
-blob_connection_string = f"ResourceId={os.environ["BLOB_RESOURCE_ID"]};" 
-azure_openai_endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
-azure_openai_embedding_deployment = "text-embedding-ada-002"
-azure_openai_embedding_model_name = "text-embedding-ada-002"
-index_name = "vegetables"
-resource_group = os.environ["AZURE_RESOURCE_GROUP"]
-storage_account_name = os.environ["AZURE_STORAGE_ACCOUNT_NAME"]
-subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
-
-# Approve private link connections
-from azure.mgmt.network import NetworkManagementClient
-from azure.mgmt.storage import StorageManagementClient
-
-print("------------- Approve private link connections ------------------")
-# network_client = NetworkManagementClient(credential, subscription_id)
-storage_client = StorageManagementClient(credential, subscription_id)
-private_endpoint_connections = storage_client.private_endpoint_connections.list(resource_group, storage_account_name)
-for connection in private_endpoint_connections:
-    print(f"connection: {connection}")
-    if connection.private_link_service_connection_state.status != "Approved":
-        response = storage_client.private_endpoint_connections.put(
-            resource_group_name=resource_group,
-            account_name=storage_account_name,
-            private_endpoint_connection_name=connection.name,
-            properties={
-                "properties": {"privateLinkServiceConnectionState": {"description": "Approved during deployment", "status": "Approved"}}
-            },
-        )
-        print(f"Approved connection: {connection.name}")
-
-# Create a data source 
-print("------------- Creating data source ------------------")
-indexer_client = SearchIndexerClient(endpoint, credential)
-container = SearchIndexerDataContainer(name=blob_container_name)
-data_source_connection = SearchIndexerDataSourceConnection(
-    name="vegetables",
-    type="azureblob",
-    container=container,
-    connection_string=blob_connection_string,
-    data_deletion_detection_policy=NativeBlobSoftDeleteDeletionDetectionPolicy(),
-    data_to_extract="storageMetadata"
-)
-data_source = indexer_client.create_or_update_data_source_connection(data_source_connection)
 
 # Create a search index  
-print("------------- Creating search index ------------------")
 index_client = SearchIndexClient(endpoint=endpoint, credential=credential)  
 fields = [  
     SearchField(name="parent_id", type=SearchFieldDataType.String, sortable=True, filterable=True, facetable=True),  
@@ -134,7 +118,7 @@ vector_search = VectorSearch(
             azure_open_ai_parameters=AzureOpenAIParameters(  
                 resource_uri=azure_openai_endpoint,  
                 deployment_id=azure_openai_embedding_deployment,  
-                model_name=azure_openai_embedding_model_name,
+                api_key=azure_openai_key,  
             ),  
         ),  
     ],  
@@ -153,9 +137,9 @@ semantic_search = SemanticSearch(configurations=[semantic_config])
 # Create the search index
 index = SearchIndex(name=index_name, fields=fields, vector_search=vector_search, semantic_search=semantic_search)  
 result = index_client.create_or_update_index(index)  
+print(f"{result.name} created")  
 
 # Create a skillset  
-print("------------- Creating skillsets ------------------")
 skillset_name = f"{index_name}-skillset"  
   
 split_skill = SplitSkill(  
@@ -176,8 +160,8 @@ embedding_skill = AzureOpenAIEmbeddingSkill(
     description="Skill to generate embeddings via Azure OpenAI",  
     context="/document/pages/*",  
     resource_uri=azure_openai_endpoint,  
-    deployment_id=azure_openai_embedding_deployment, 
-    model_name=azure_openai_embedding_model_name, 
+    deployment_id=azure_openai_embedding_deployment,  
+    api_key=azure_openai_key,  
     inputs=[  
         InputFieldMappingEntry(name="text", source="/document/pages/*"),  
     ],  
@@ -213,17 +197,17 @@ skillset = SearchIndexerSkillset(
   
 client = SearchIndexerClient(endpoint, credential)  
 client.create_or_update_skillset(skillset)  
+print(f"{skillset.name} created")  
 
 # Create an indexer  
-print("------------- Creating indexer ------------------")
 indexer_name = f"{index_name}-indexer"  
   
 indexer = SearchIndexer(  
     name=indexer_name,  
     description="Indexer to index documents and generate embeddings",  
-    # skillset_name=skillset_name,  
+    skillset_name=skillset_name,  
     target_index_name=index_name,  
-    data_source_name="vegetables",  
+    data_source_name=data_source.name,  
     # Map the metadata_storage_name field to the title field in the index to display the PDF title in the search results  
     field_mappings=[FieldMapping(source_field_name="metadata_storage_name", target_field_name="title")]  
 )  
@@ -233,24 +217,4 @@ indexer_result = indexer_client.create_or_update_indexer(indexer)
   
 # Run the indexer  
 indexer_client.run_indexer(indexer_name)  
-
-# Fix Web App startup configuration
-print("------------- Fixing WebApp startup configuration ------------------")
-from azure.mgmt.resource import ResourceManagementClient
-from azure.mgmt.web import WebSiteManagementClient
-
-subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
-resource_group_name = os.environ["AZURE_RESOURCE_GROUP"]
-app_name = os.environ["AZURE_APP_NAME"]
-startup_file = "python3 -m gunicorn app:app"
-
-# Create clients
-resource_client = ResourceManagementClient(credential, subscription_id)
-web_client = WebSiteManagementClient(credential, subscription_id)
-
-# Get the web app
-web_app = web_client.web_apps.get(resource_group_name, app_name)
-
-# Update the startup file
-web_app.site_config.app_command_line = startup_file
-web_client.web_apps.create_or_update(resource_group_name, app_name, web_app)
+print(f' {indexer_name} is created and running. If queries return no results, please wait a bit and try again.')  

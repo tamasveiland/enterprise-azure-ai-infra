@@ -3,8 +3,6 @@ variable "prefix" {
   default     = "cetc"
   description = <<EOF
 Prefix for Azure resources. 
-
-For example, a prefix of "demo" will result in resources named like "demo-hub-rg".
 EOF
 }
 

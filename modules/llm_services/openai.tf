@@ -1,6 +1,6 @@
 // Azure OpenAI Service
 resource "azurerm_cognitive_account" "openai" {
-  name                          = module.llm_naming.cognitive_account.name
+  name                          = module.llm_naming.cognitive_account.name_unique
   resource_group_name           = var.resource_group
   location                      = var.location
   kind                          = "OpenAI"
@@ -15,6 +15,12 @@ resource "azurerm_cognitive_account" "openai" {
 
   lifecycle {
     ignore_changes = [customer_managed_key, network_acls]
+  }
+
+  timeouts {
+    create = "120m"
+    update = "120m"
+    delete = "120m"
   }
 }
 
@@ -56,6 +62,8 @@ resource "azurerm_key_vault_key" "openai" {
   key_type     = "RSA"
   key_size     = 2048
   key_opts     = ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"]
+
+  # depends_on = [azurerm_role_assignment.self]
 }
 
 // Customer managed key for cognitive service
@@ -63,6 +71,8 @@ resource "azurerm_cognitive_account_customer_managed_key" "openai" {
   cognitive_account_id = azurerm_cognitive_account.openai.id
   key_vault_key_id     = azurerm_key_vault_key.openai.id
   identity_client_id   = azurerm_user_assigned_identity.main.client_id
+
+  # depends_on = [azurerm_role_assignment.openai_kv]
 }
 
 // Private endpoint for cognitive service
@@ -91,7 +101,7 @@ resource "azurerm_private_endpoint" "openai" {
 
 
 // Give access to AI Search
-resource "azurerm_role_assignment" "openai" {
+resource "azurerm_role_assignment" "search_openai" {
   principal_id         = var.search_principal_id
   role_definition_name = "Cognitive Services OpenAI Contributor"
   scope                = azurerm_cognitive_account.openai.id

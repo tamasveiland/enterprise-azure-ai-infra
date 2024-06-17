@@ -1,6 +1,6 @@
 // Azure AI Search
 resource "azurerm_search_service" "main" {
-  name                          = module.llmapp_naming.search_service.name
+  name                          = module.llmapp_naming.search_service.name_unique
   resource_group_name           = var.resource_group
   location                      = var.location
   sku                           = "standard"
@@ -43,8 +43,17 @@ resource "azurerm_search_shared_private_link_service" "blob" {
   search_service_id  = azurerm_search_service.main.id
   subresource_name   = "blob"
   target_resource_id = azurerm_storage_account.main.id
-  request_message    = "ai-search-connection-to-blob-storage"
+  request_message    = "search"
 }
+
+# // Private Link connection to OpenAI
+# resource "azurerm_search_shared_private_link_service" "openai" {
+#   name               = "openai-spl"
+#   search_service_id  = azurerm_search_service.main.id
+#   subresource_name   = "blob"
+#   target_resource_id = var.azure_openai_id
+#   request_message    = "search"
+# }
 
 // Give access to OpenAI Service
 resource "azurerm_role_assignment" "openai_search_service_contributor" {

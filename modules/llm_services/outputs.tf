@@ -10,6 +10,10 @@ output "azure_openai_resource" {
   value = azurerm_cognitive_account.openai.name
 }
 
+output "azure_openai_id" {
+  value = azurerm_cognitive_account.openai.id
+}
+
 output "azure_openai_key" {
   value     = azurerm_cognitive_account.openai.primary_access_key
   sensitive = true

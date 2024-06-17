@@ -1,4 +1,6 @@
-python-dotenv
-azure-search-documents==11.6.0b3
+azure-search-documents==11.6.0b4
 azure-storage-blob
 azure-identity
+azure-mgmt-resource
+azure-mgmt-web
+azure-mgmt-storage
