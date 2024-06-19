@@ -5,52 +5,19 @@ resource "azurerm_key_vault" "main" {
   tenant_id                 = data.azurerm_client_config.current.tenant_id
   sku_name                  = "standard"
   purge_protection_enabled  = true
-  enable_rbac_authorization = false
-
-  access_policy {
-    tenant_id = azurerm_cognitive_account.openai.identity[0].tenant_id
-    object_id = azurerm_cognitive_account.openai.identity[0].principal_id
-    key_permissions = [
-      "Get", "Create", "List", "Restore", "Recover", "UnwrapKey", "WrapKey", "Purge", "Encrypt", "Decrypt", "Sign", "Verify"
-    ]
-    secret_permissions = [
-      "Get",
-    ]
-  }
-
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-    key_permissions = [
-      "Get", "Create", "Delete", "List", "Restore", "Recover", "UnwrapKey", "WrapKey", "Purge", "Encrypt", "Decrypt", "Sign", "Verify", "GetRotationPolicy"
-    ]
-    secret_permissions = [
-      "Get",
-    ]
-  }
-
-  access_policy {
-    tenant_id = azurerm_cognitive_account.openai.identity[0].tenant_id
-    object_id = azurerm_cognitive_account.openai.identity[0].principal_id
-    key_permissions = [
-      "Get", "Create", "Delete", "List", "Restore", "Recover", "UnwrapKey", "WrapKey", "Purge", "Encrypt", "Decrypt", "Sign", "Verify"
-    ]
-    secret_permissions = [
-      "Get",
-    ]
-  }
+  enable_rbac_authorization = true
 }
 
-# // Give access to self
-# resource "azurerm_role_assignment" "self" {
-#   principal_id         = data.azurerm_client_config.current.object_id
-#   role_definition_name = "Key Vault Administrator"
-#   scope                = azurerm_key_vault.main.id
-# }
+// Give access to self
+resource "azurerm_role_assignment" "self" {
+  principal_id         = data.azurerm_client_config.current.object_id
+  role_definition_name = "Key Vault Administrator"
+  scope                = azurerm_key_vault.main.id
+}
 
-# // Give access to OpenAI for encryption
-# resource "azurerm_role_assignment" "openai" {
-#   principal_id         = azurerm_cognitive_account.openai.identity[0].principal_id
-#   role_definition_name = "Key Vault Crypto Service Encryption User"
-#   scope                = azurerm_key_vault.main.id
-# }
+// Give access to OpenAI for encryption
+resource "azurerm_role_assignment" "openai" {
+  principal_id         = azurerm_cognitive_account.openai.identity[0].principal_id
+  role_definition_name = "Key Vault Crypto Service Encryption User"
+  scope                = azurerm_key_vault.main.id
+}

@@ -63,16 +63,21 @@ resource "azurerm_key_vault_key" "openai" {
   key_size     = 2048
   key_opts     = ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"]
 
-  # depends_on = [azurerm_role_assignment.self]
+  depends_on = [azurerm_role_assignment.self]
 }
 
 // Customer managed key for cognitive service
 resource "azurerm_cognitive_account_customer_managed_key" "openai" {
   cognitive_account_id = azurerm_cognitive_account.openai.id
   key_vault_key_id     = azurerm_key_vault_key.openai.id
-  identity_client_id   = azurerm_user_assigned_identity.main.client_id
 
-  # depends_on = [azurerm_role_assignment.openai_kv]
+  depends_on = [azurerm_role_assignment.openai]
+
+  timeouts {
+    create = "120m"
+    update = "120m"
+    delete = "120m"
+  }
 }
 
 // Private endpoint for cognitive service

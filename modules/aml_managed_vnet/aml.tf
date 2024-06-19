@@ -25,8 +25,14 @@ resource "azurerm_machine_learning_workspace" "main" {
     isolation_mode = "AllowOnlyApprovedOutbound"
   }
 
+  timeouts {
+    create = "1h"
+    update = "1h"
+  }
+
   depends_on = [
     azurerm_role_assignment.aml_storage,
     azurerm_role_assignment.aml_kv_read,
+    azurerm_role_assignment.aml,
   ]
 }
