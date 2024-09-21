@@ -67,8 +67,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: "${{ inputs.tf_key }}"
-          path: "${{ inputs.path }}/${{ inputs.tf_key }}.zip"
+          name: "${{ env.tf_key }}"
+          path: "${{ env.path }}/${{ env.tf_key }}.zip"
           retention-days: 5
 
   tf_apply:
@@ -90,11 +90,11 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ inputs.tf_key }}
-          path: ${{ inputs.path }}
+          name: ${{ env.tf_key }}
+          path: ${{ env.path }}
 
       - name: Decompress TF Plan artifact
-        run: unzip ${{ inputs.tf_key }}.zip
+        run: unzip ${{ env.tf_key }}.zip
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2.0.0
