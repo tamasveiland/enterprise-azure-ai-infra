@@ -113,7 +113,7 @@ jobs:
           path: ${{ env.path }} # optional
 
       - name: Decompress TF Plan artifact
-        run: unzip ${{ env.TF_KEY }}.zip
+        run: unzip -o ${{ env.TF_KEY }}.zip
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2.0.0
