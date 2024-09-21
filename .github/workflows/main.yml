@@ -82,7 +82,7 @@ jobs:
           # Artifact name
           name: modules # optional, default is artifact
           # A file, directory or wildcard pattern that describes what to upload
-          path: modules.zip
+          path: "${{ env.path }}/modules.zip"
           retention-days: 5 # optional
 
   tf_apply:
