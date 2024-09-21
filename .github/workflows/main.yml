@@ -64,12 +64,14 @@ jobs:
       - name: Compress TF Plan artifact
         run: zip -r ${{ env.TF_KEY }}.zip ./*
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.4.0
         with:
-          name: "${{ env.TF_KEY }}"
-          path: "${{ env.path }}/${{ env.TF_KEY }}.zip"
-          retention-days: 5
+          # Artifact name
+          name: ${{ env.TF_KEY }} # optional, default is artifact
+          # A file, directory or wildcard pattern that describes what to upload
+          path: ${{ env.TF_KEY }}.zip #"${{ env.path }}/${{ env.TF_KEY }}.zip"
+          retention-days: 5 # optional
 
   tf_apply:
     runs-on: ubuntu-latest
@@ -87,11 +89,13 @@ jobs:
           tenant-id: ${{ env.ARM_TENANT_ID }}
           subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v4.1.8
         with:
-          name: ${{ env.TF_KEY }}
-          path: ${{ env.path }}
+          # Name of the artifact to download. If unspecified, all artifacts for the run are downloaded.
+          name: ${{ env.TF_KEY }} # optional
+          # Destination path. Supports basic tilde expansion. Defaults to $GITHUB_WORKSPACE
+          path: ${{ env.path }} # optional
 
       - name: Decompress TF Plan artifact
         run: unzip ${{ env.TF_KEY }}.zip
