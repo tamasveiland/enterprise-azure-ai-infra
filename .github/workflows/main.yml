@@ -62,14 +62,28 @@ jobs:
         run: exit 1
 
       - name: Compress TF Plan artifact
-        run: zip -r ${{ inputs.tf_key }}.zip ./*
+        run: zip -r ${{ env.TF_KEY }}.zip ./*
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+      - name: Compress Terraform modules artifact
+        run: zip -r modules.zip ../../modules/*
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.4.0
         with:
-          name: "${{ inputs.tf_key }}"
-          path: "${{ inputs.path }}/${{ inputs.tf_key }}.zip"
-          retention-days: 5
+          # Artifact name
+          name: ${{ env.TF_KEY }} # optional, default is artifact
+          # A file, directory or wildcard pattern that describes what to upload
+          path: "${{ env.path }}/${{ env.TF_KEY }}.zip"
+          retention-days: 5 # optional
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.4.0
+        with:
+          # Artifact name
+          name: modules # optional, default is artifact
+          # A file, directory or wildcard pattern that describes what to upload
+          path: "${{ env.path }}/modules.zip"
+          retention-days: 5 # optional
 
   tf_apply:
     runs-on: ubuntu-latest
@@ -87,19 +101,24 @@ jobs:
           tenant-id: ${{ env.ARM_TENANT_ID }}
           subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v4.1.8
         with:
-          name: ${{ inputs.tf_key }}
-          path: ${{ inputs.path }}
+          # Name of the artifact to download. If unspecified, all artifacts for the run are downloaded.
+          name: ${{ env.TF_KEY }} # optional
+          # Destination path. Supports basic tilde expansion. Defaults to $GITHUB_WORKSPACE
+          path: ${{ env.path }} # optional
 
       - name: Decompress TF Plan artifact
-        run: unzip ${{ inputs.tf_key }}.zip
+        run: unzip -o ${{ env.TF_KEY }}.zip
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2.0.0
         with:
-          terraform_version: ${{ inputs.tf_version }}
+          terraform_version: ${{ env.tf_version }}
 
       - name: Terraform Init
         id: init
