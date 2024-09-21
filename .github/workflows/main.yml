@@ -8,17 +8,18 @@ on:
 env:
   path: demos/enterprise_ai_infra         ## Path to terraform root module (Required)
   tf_version: latest                      ## Terraform version e.g: 1.1.0 Default=latest (Optional)
-  az_resource_group: rg-terraform-backend ## AZ backend - AZURE Resource Group hosting terraform backend storage acc (Required)
-  az_storage_acc: tfcorebackendsa6047     ## AZ backend - AZURE terraform backend storage acc (Required)
-  az_container_name: tfstate              ## AZ backend - AZURE storage container hosting state files (Required)
-  tf_key: foundation-dev                  ## AZ backend - Specifies name that will be given to terraform state file and plan artifact (Required)
-  tf_vars_file: config-dev.tfvars         ## Terraform TFVARS (Required)
+  RESOURCE_GROUP: rg-terraform-backend ## AZ backend - AZURE Resource Group hosting terraform backend storage acc (Required)
+  STORAGE_ACCOUNT: tfcorebackendsa6047     ## AZ backend - AZURE terraform backend storage acc (Required)
+  CONTAINER_NAME: tfstate              ## AZ backend - AZURE storage container hosting state files (Required)
+  TF_KEY: foundation-dev                  ## AZ backend - Specifies name that will be given to terraform state file and plan artifact (Required)
+  TF_VARS: config-dev.tfvars         ## Terraform TFVARS (Required)
   enable_TFSEC: true                      ## (Optional)  Enable TFSEC IaC scans (Private repo requires GitHub enterprise)
   
-  arm_client_id: ${{ secrets.ARM_CLIENT_ID }}             ## ARM Client ID 
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}             ## ARM Client ID 
   # arm_client_secret: ${{ secrets.ARM_CLIENT_SECRET }}     ## ARM Client Secret
-  arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }} ## ARM Subscription ID
-  arm_tenant_id: ${{ secrets.ARM_TENANT_ID }}             ## ARM Tenant ID
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }} ## ARM Subscription ID
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}             ## ARM Tenant ID
+  ARM_USE_OIDC: true
 
 jobs:
 
@@ -28,19 +29,6 @@ jobs:
       run:
         shell: bash
         working-directory: ${{ env.path }}
-    env:
-      STORAGE_ACCOUNT: ${{ env.az_storage_acc }}
-      CONTAINER_NAME: ${{ env.az_container_name }}
-      RESOURCE_GROUP: ${{ env.az_resource_group }}
-      TF_KEY: ${{ env.tf_key }}.tfstate
-      TF_VARS: ${{ env.tf_vars_file }}
-      # AZURE service principal details
-      ARM_CLIENT_ID: ${{ secrets.arm_client_id }}
-      #ARM_CLIENT_SECRET: ${{ secrets.arm_client_secret }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.arm_subscription_id }}
-      ARM_TENANT_ID: ${{ secrets.arm_tenant_id }}
-      ARM_USE_OIDC: true
-  
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -109,17 +97,6 @@ jobs:
       run:
         shell: bash
         working-directory: ${{ env.path }}
-    env:
-      STORAGE_ACCOUNT: ${{ env.az_storage_acc }}
-      CONTAINER_NAME: ${{ env.az_container_name }}
-      RESOURCE_GROUP: ${{ env.az_resource_group }}
-      TF_KEY: ${{ env.tf_key }}.tfstate
-      # AZURE service principal details
-      ARM_CLIENT_ID: ${{ secrets.arm_client_id }}
-      #ARM_CLIENT_SECRET: ${{ secrets.arm_client_secret }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.arm_subscription_id }}
-      ARM_TENANT_ID: ${{ secrets.arm_tenant_id }}
-  
     steps:
       - name: Azure Login
         uses: Azure/login@v1
