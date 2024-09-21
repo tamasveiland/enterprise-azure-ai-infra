@@ -101,6 +101,9 @@ jobs:
           tenant-id: ${{ env.ARM_TENANT_ID }}
           subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4.1.8
         with:
