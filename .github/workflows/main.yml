@@ -67,8 +67,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: "${{ env.tf_key }}"
-          path: "${{ env.path }}/${{ env.tf_key }}.zip"
+          name: "${{ env.TF_KEY }}"
+          path: "${{ env.path }}/${{ env.TF_KEY }}.zip"
           retention-days: 5
 
   tf_apply:
