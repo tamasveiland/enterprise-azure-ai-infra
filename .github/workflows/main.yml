@@ -62,7 +62,7 @@ jobs:
         run: exit 1
 
       - name: Compress TF Plan artifact
-        run: zip -r ${{ inputs.tf_key }}.zip ./*
+        run: zip -r ${{ env.TF_KEY }}.zip ./*
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -90,16 +90,16 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
-          name: ${{ env.tf_key }}
+          name: ${{ env.TF_KEY }}
           path: ${{ env.path }}
 
       - name: Decompress TF Plan artifact
-        run: unzip ${{ env.tf_key }}.zip
+        run: unzip ${{ env.TF_KEY }}.zip
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2.0.0
         with:
-          terraform_version: ${{ inputs.tf_version }}
+          terraform_version: ${{ env.tf_version }}
 
       - name: Terraform Init
         id: init
