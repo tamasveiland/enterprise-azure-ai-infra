@@ -1,0 +1,121 @@
+name: "Infrastructure"
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
+on:
+  workflow_dispatch:
+    inputs:
+      plan_deploy_test:
+        type: boolean
+        description: Run Terraform plan and apply actions for the test environment
+      plan_deploy_prod:
+        type: boolean
+        description: Run Terraform plan and apply actions for the production environment
+
+jobs:
+  Plan_Dev:
+    uses: tamasveiland/terraform-samples/.github/workflows/terraform_plan.yml@master
+    name: 'Plan Development'
+    with:
+      path: iac/terraform                     ## Path to terraform root module (Required)
+      tf_version: latest                      ## Terraform version e.g: 1.1.0 Default=latest (Optional)
+      az_resource_group: rg-terraform-backend ## AZ backend - AZURE Resource Group hosting terraform backend storage acc (Required)
+      az_storage_acc: tfcorebackendsa6047     ## AZ backend - AZURE terraform backend storage acc (Required)
+      az_container_name: tfstate              ## AZ backend - AZURE storage container hosting state files (Required)
+      tf_key: foundation-dev                  ## AZ backend - Specifies name that will be given to terraform state file and plan artifact (Required)
+      tf_vars_file: config-dev.tfvars         ## Terraform TFVARS (Required)
+      enable_TFSEC: true                      ## (Optional)  Enable TFSEC IaC scans (Private repo requires GitHub enterprise)
+    secrets:
+      arm_client_id: ${{ secrets.ARM_CLIENT_ID }}             ## ARM Client ID 
+      # arm_client_secret: ${{ secrets.ARM_CLIENT_SECRET }}     ## ARM Client Secret
+      arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }} ## ARM Subscription ID
+      arm_tenant_id: ${{ secrets.ARM_TENANT_ID }}             ## ARM Tenant ID
+
+  Deploy_Dev:
+    needs: Plan_Dev
+    uses: tamasveiland/terraform-samples/.github/workflows/terraform_apply.yml@master
+    name: 'Deploy Development'
+    with:
+      path: iac/terraform                     ## Path to terraform root module (Required)
+      tf_version: latest                      ## Terraform version e.g: 1.1.0 Default=latest (Optional)
+      az_resource_group: rg-terraform-backend ## AZ backend - AZURE Resource Group hosting terraform backend storage acc (Required)
+      az_storage_acc: tfcorebackendsa6047     ## AZ backend - AZURE terraform backend storage acc (Required)
+      az_container_name: tfstate              ## AZ backend - AZURE storage container hosting state files (Required)
+      tf_key: foundation-dev                  ## AZ backend - Specifies name that will be given to terraform state file and plan artifact (Required)
+      gh_environment: ''                      ## GH Environment. Default=null - (Optional)
+    secrets:
+      arm_client_id: ${{ secrets.ARM_CLIENT_ID }}             ## ARM Client ID 
+      # arm_client_secret: ${{ secrets.ARM_CLIENT_SECRET }}     ## ARM Client Secret
+      arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }} ## ARM Subscription ID
+      arm_tenant_id: ${{ secrets.ARM_TENANT_ID }}             ## ARM Tenant ID
+
+  Plan_Test:
+    uses: tamasveiland/terraform-samples/.github/workflows/terraform_plan.yml@master
+    name: 'Plan Test'
+    if: ${{ github.event.inputs.plan_deploy_test == 'true' }}
+    with:
+      path: iac/terraform
+      az_resource_group: rg-terraform-backend-test
+      az_storage_acc: tfbackendtestsa1163
+      az_container_name: tfstate
+      tf_key: foundation-test
+      tf_vars_file: config-test.tfvars
+      enable_TFSEC: true                       
+    secrets:
+      arm_client_id: ${{ secrets.ARM_CLIENT_ID_TEST }}
+      # arm_client_secret: ${{ secrets.ARM_CLIENT_SECRET_TEST }}
+      arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID_TEST }}
+      arm_tenant_id: ${{ secrets.ARM_TENANT_ID_TEST }}
+
+  Deploy_Test:
+    needs: [Plan_Test, Deploy_Dev]
+    uses: tamasveiland/terraform-samples/.github/workflows/terraform_apply.yml@master
+    name: 'Deploy Test'
+    with:
+      path: iac/terraform
+      az_resource_group: rg-terraform-backend-test
+      az_storage_acc: tfbackendtestsa1163
+      az_container_name: tfstate
+      tf_key: foundation-test
+      gh_environment: UserAcceptanceTesting
+    secrets:
+      arm_client_id: ${{ secrets.ARM_CLIENT_ID_TEST }}
+      # arm_client_secret: ${{ secrets.ARM_CLIENT_SECRET_TEST }}
+      arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID_TEST }}
+      arm_tenant_id: ${{ secrets.ARM_TENANT_ID_TEST }}
+
+  vPlan_Prod:
+    uses: tamasveiland/terraform-samples/.github/workflows/terraform_plan.yml@master
+    name: 'Plan Prod'
+    if: ${{ github.event.inputs.plan_deploy_prod == 'true' }}
+    with:
+      path: iac/terraform
+      tf_version: latest
+      az_resource_group: rg-terraform-backend-prod
+      az_storage_acc: tfbackendprodsa6488
+      az_container_name: tfstate
+      tf_key: foundation-prod
+      tf_vars_file: config-prod.tfvars
+      enable_TFSEC: true                          
+    secrets:
+      arm_client_id: ${{ secrets.ARM_CLIENT_ID_PROD }}
+      # arm_client_secret: ${{ secrets.ARM_CLIENT_SECRET_PROD }}
+      arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID_PROD }}
+      arm_tenant_id: ${{ secrets.ARM_TENANT_ID_PROD }}
+
+  vDeploy_Prod:
+    needs: [vPlan_Prod, Deploy_Test]
+    uses: tamasveiland/terraform-samples/.github/workflows/terraform_apply.yml@master
+    name: 'Deploy Production'
+    with:
+      path: iac/terraform
+      az_resource_group: rg-terraform-backend-prod
+      az_storage_acc: tfbackendprodsa6488
+      az_container_name: tfstate
+      tf_key: foundation-prod
+      gh_environment: Production
+    secrets:
+      arm_client_id: ${{ secrets.ARM_CLIENT_ID_PROD }}
+      # arm_client_secret: ${{ secrets.ARM_CLIENT_SECRET_PROD }}
+      arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID_PROD }}
+      arm_tenant_id: ${{ secrets.ARM_TENANT_ID_PROD }}
