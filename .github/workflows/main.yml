@@ -95,7 +95,7 @@ jobs:
           # Name of the artifact to download. If unspecified, all artifacts for the run are downloaded.
           name: ${{ env.TF_KEY }} # optional
           # Destination path. Supports basic tilde expansion. Defaults to $GITHUB_WORKSPACE
-          #path: ${{ env.path }} # optional
+          path: ${{ env.path }} # optional
 
       - name: Decompress TF Plan artifact
         run: unzip ${{ env.TF_KEY }}.zip
